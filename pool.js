@@ -13,7 +13,16 @@ const pool = new Pool({
 
   const getUsers = async () => {
     let usuarios = await pool.query("SELECT * FROM usuarios");
-    console.table(usuarios.rows)
+    return usuarios.rows;
   }
 
-  getUsers();
+  const getUserById = async (id) => {
+    let usuarios = await pool.query(`SELECT * FROM usuarios where id = ${id}`);
+    return usuarios.rows;
+  }
+
+
+  module.exports = {
+    getUsers,
+    getUserById
+  }
