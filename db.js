@@ -18,7 +18,8 @@ const client = new Client({
 }) */
 client.connect()
 
-client.query("SELECT * FROM usuarios", (error, result) => {
+client.query("SELECT * FROM usuarios WHERE id = 1", (error, result) => {
     if(error) console.error(error)
     console.table(result.rows);
+    client.end();
 })
