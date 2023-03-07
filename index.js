@@ -1,14 +1,18 @@
 const express = require('express');
-const {getUsers, getUserById} = require('./pool.js')
+const {getUsers, getUserById, addUser, updateUser} = require('./pool.js')
+const cors = require('cors')
 
 const app = express();
 
 //MIDDLEWARE
-app.use(express.json())
+app.use(express.json());
 app.use(express.urlencoded({extended: false}));
+app.use(cors());
 
-app.listen(3000, ()=> console.log("servidor escuchando en http://localhost:3000/"))
+app.listen(3000, ()=> console.log("servidor escuchando en http://localhost:3000/"));
 
+
+//MÉTODOS DE LECTURA
 app.get("/usuarios", async (req, res) => {
    let resultado = await getUsers();
    console.log(resultado)
@@ -27,4 +31,34 @@ app.get("/usuarios/:id", async (req, res) => {
         console.log(error)
         res.send("Se ha generado un error en la consulta.")
     }
+ })
+
+ //CREAR UN NUEVO USUARIO
+
+ app.post("/usuarios", async (req, res) => {
+    try {
+         resultado = await addUser(req.body);
+         res.send(`usuario ${req.body.nombre} agregado correctamente`);
+    } catch (error) {
+        console.log(error)
+        res.send("ha ocurrido un error al insertar al usuario.")
+    }
+   
+ })
+
+ //ACTUALIZAR USUARIO
+ app.put("/usuarios/:id", async (req, res) => {
+    try {
+        let { id } = req.params;
+        let { nombre, apellido, rut, email, password} = req.body;
+        let usuario = {
+        id, nombre, apellido, rut, email, password
+        }
+         resultado = await updateUser(usuario);
+         res.send(`usuario ${nombre} actualizado correctamente`);
+    } catch (error) {
+        console.log(error)
+        res.send("ha ocurrido un error al actualizar el usuaruo al usuario.")
+    }
+   
  })
