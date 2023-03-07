@@ -1,5 +1,5 @@
 const express = require('express');
-const {getUsers, getUserById, addUser, updateUser} = require('./pool.js')
+const {getUsers, getUserById, addUser, updateUser, deleteUserById} = require('./pool.js')
 const cors = require('cors')
 
 const app = express();
@@ -58,7 +58,22 @@ app.get("/usuarios/:id", async (req, res) => {
          res.send(`usuario ${nombre} actualizado correctamente`);
     } catch (error) {
         console.log(error)
-        res.send("ha ocurrido un error al actualizar el usuaruo al usuario.")
+        res.send("ha ocurrido un error al actualizar el usuario.")
     }
    
+ })
+
+ app.delete("/usuarios/:id", async (req, res) => {
+    try {
+        let {id} = req.params;
+        let usuario = await deleteUserById(id)
+        if(!usuario){
+            return res.send("No se encontró ningún usuario con el id: " + id)
+        }
+        res.send(`el usuario con nombre: ${usuario.nombre} y ID: ${usuario.id} ha sido eliminado.`)
+        
+    } catch (error) {
+        console.log(error)
+        res.send("ha ocurrido un error al eliminar el usuario.")
+    }
  })

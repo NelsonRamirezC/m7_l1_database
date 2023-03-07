@@ -32,17 +32,26 @@ const pool = new Pool({
   }
 
   const updateUser = async (usuario) => {
-    let consulta = ""
-    let values = [usuario.id, usuario.nombre, usuario.apellido, usuario.rut, usuario.email, usuario.password];
+    //id, nombre, apellido, rut, email, password
+    let consulta = "UPDATE usuarios SET nombre=$1, apellido=$2, rut=$3, email=$4, password=$5 WHERE id=$6 RETURNING *"
+    let values = [usuario.nombre, usuario.apellido, usuario.rut, usuario.email, usuario.password, usuario.id];
     let usuarios = await pool.query(consulta, values);
+    console.log(usuarios.rows);
     return usuarios.rows;
   }
   
+  const deleteUserById = async (id) => {
+    let consulta = "delete from usuarios where id=$1 RETURNING *";
+    let values = [id]
+    let usuarios = await pool.query(consulta, values);
+    return usuarios.rows[0];
+  }
 
 
   module.exports = {
     getUsers,
     getUserById,
     addUser,
-    updateUser
+    updateUser,
+    deleteUserById
   }
