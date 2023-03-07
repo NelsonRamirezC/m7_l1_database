@@ -6,18 +6,19 @@ const pool = new Pool({
     database: "m7_usuarios",
     password: '123456',
     port:5432,
-    max: 20,
+    max: 5,
     idleTimeoutMillis: 5000,
     connectionTimeoutMillis: 1000,
   })
 
+  //CONSULTAS A TABLA USUARIOS
   const getUsers = async () => {
-    let usuarios = await pool.query("SELECT * FROM usuarios");
+    let usuarios = await pool.query("SELECT nombre, apellido, rut, email FROM usuarios");
     return usuarios.rows;
   }
 
   const getUserById = async (id) => {
-    let consulta = "SELECT * FROM usuarios where id = $1";
+    let consulta = "SELECT nombre, apellido, rut, email FROM usuarios where id = $1";
     let values = [id]
     let usuarios = await pool.query(consulta, values);
     return usuarios.rows;
@@ -47,11 +48,26 @@ const pool = new Pool({
     return usuarios.rows[0];
   }
 
+  //CONSULTA A TABLA PRODUCTOS
+  const getProducts = async () => {
+    let productos = await pool.query("SELECT * FROM productos");
+    return productos.rows;
+  }
+
+  const addProduct = async (producto) => {
+    let values = Object.values(producto);
+    let consulta = "INSERT INTO productos (nombre, descripcion, precio, stock) VALUES($1, $2, $3, $4) RETURNING *";
+    let result = await pool.query(consulta, values);
+    return result.rows;
+  }
+
 
   module.exports = {
     getUsers,
     getUserById,
     addUser,
     updateUser,
-    deleteUserById
+    deleteUserById,
+    getProducts,
+    addProduct 
   }

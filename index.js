@@ -1,5 +1,5 @@
 const express = require('express');
-const {getUsers, getUserById, addUser, updateUser, deleteUserById} = require('./pool.js')
+const {getUsers, getUserById, addUser, updateUser, deleteUserById, getProducts, addProduct } = require('./pool.js')
 const cors = require('cors')
 
 const app = express();
@@ -14,9 +14,14 @@ app.listen(3000, ()=> console.log("servidor escuchando en http://localhost:3000/
 
 //MÉTODOS DE LECTURA
 app.get("/usuarios", async (req, res) => {
-   let resultado = await getUsers();
-   console.log(resultado)
-    res.send(resultado)
+    try {
+        let resultado = await getUsers();
+        console.log(resultado)
+        res.json({code: 200, data: resultado})
+    } catch (error) {
+        res.status(500).json({code:500, message: "Ha ocurrido un error al buscar los usuarios."})
+    }
+   
 })
 
 app.get("/usuarios/:id", async (req, res) => {
@@ -37,8 +42,15 @@ app.get("/usuarios/:id", async (req, res) => {
 
  app.post("/usuarios", async (req, res) => {
     try {
-         resultado = await addUser(req.body);
-         res.send(`usuario ${req.body.nombre} agregado correctamente`);
+        let nuevoUsuario = req.body
+        let regex = /^[ÁÉÍÓÚA-Z][a-záéíóú]+(\s+[ÁÉÍÓÚA-Z]?[a-záéíóú]+)*$/i
+
+        if(!regex.test(nuevoUsuario.nombre))return res.json({code: 400, message: "Nombre no cumple con el formato"})
+
+        if(!regex.test(nuevoUsuario.apellido))return res.json({code: 400, message: "Apellido no cumple con el formato"})
+
+         resultado = await addUser(nuevoUsuario);
+         res.send(`usuario ${nuevoUsuario.nombre} agregado correctamente`);
     } catch (error) {
         console.log(error)
         res.send("ha ocurrido un error al insertar al usuario.")
@@ -75,5 +87,36 @@ app.get("/usuarios/:id", async (req, res) => {
     } catch (error) {
         console.log(error)
         res.send("ha ocurrido un error al eliminar el usuario.")
+    }
+ })
+
+
+ app.get("/productos", async (req, res) => {
+
+    try {
+        let productos = await getProducts()
+        res.json({code: 200, data: productos})
+    } catch (error) {
+        res.status(500).json({code: 500, message: "Error al buscar los productos."})
+    }
+ })
+
+ app.post("/productos", async (req, res) => {
+
+    try {
+        let {nombre, descripcion, precio, stock } = req.body;
+        let nuevoProducto = {
+            nombre, descripcion, precio, stock
+        }
+
+        let regex = /^[0-9]+$/g
+
+        if(!regex.test(stock)) return res.json({code: 400, message: "stock no cumple con el formato"})
+
+        let producto = await addProduct(nuevoProducto)
+        res.json({code: 200, data: producto})
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({code: 500, message: "Error al agregar un producto."})
     }
  })
