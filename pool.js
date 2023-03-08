@@ -13,7 +13,14 @@ const pool = new Pool({
 
   //CONSULTAS A TABLA USUARIOS
   const getUsers = async () => {
-    let usuarios = await pool.query("SELECT nombre, apellido, rut, email FROM usuarios");
+    let consulta = {
+        //rowMode: "json",
+        text: "SELECT nombre, apellido, rut, email FROM usuarios"
+    }
+    let usuarios = await pool.query(consulta);
+    usuarios.rows.forEach((usuario, index) => {
+        console.log("usuario "+index+": ", usuario)
+    });
     return usuarios.rows;
   }
 
