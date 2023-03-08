@@ -12,30 +12,38 @@ const pool = new Pool({
     connectionTimeoutMillis: 1000,
   })
 
-  const getProducts = async () => {
-    const client = await pool.connect()
+pool.connect(async (error, client, release) => {
+  if (error) {
+    console.log(
+      "Se ha generado un error en la conexión a la BD usuarios: " + error
+    );
+  } else {
+    try {
+      const consulta = "select * from productos";
+      const consultaCursor = new Cursor(consulta);
+      const cursor = client.query(consultaCursor);
 
-    let consulta = "SELECT * FROM productos";
-
-    const cursor = client.query(new Cursor(consulta))
-    
-    let bandera = true;
-    while(bandera){
-        cursor.read(5, (error, rows) => {
-            if(error) return console.log("ha ocurrido un error")
-            rows.forEach(registro => {
-                console.log(registro)
-                if(registro.nombre == "Ginnie"){
-                    bandera = false;
-                    console.log(registro.nombre)
-                    console.log("registro encontrado")
-                }
-            })
-        })
+      //let data1 = await cursor.read(1);
+      let flag = true;
+      let rows = [0];
+      let numero = 1;
+      while (flag && rows.length) {
+        rows = await cursor.read(5);
+        rows.forEach((registro) => {
+            console.log(numero)
+            numero ++;
+          if (registro.nombre == "Hettie") {
+            flag = false;
+            console.log("registro encontrado: ", registro.nombre)
+            cursor.close();
+          }
+        });
+      }
+      release();
+      pool.end();
+      //const resultados = await client.query(consulta);
+    } catch (e) {
+      console.log("Error al consultar la BD usuarios: " + e);
     }
-
-
-}
-
-
-  getProducts();
+  }
+});
